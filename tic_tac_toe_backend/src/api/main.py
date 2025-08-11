@@ -156,7 +156,15 @@ async def make_move(
     updated_doc, status_message = apply_move(doc, payload.position, payload.player)
 
     # Persist the update
-    await db.games.update_one({"_id": oid}, {"$set": updated_doc})
+    # IMPORTANT: Do not attempt to $set the entire document including _id, which is immutable.
+    # Instead, only update the fields that can change as a result of a move.
+    update_fields = {
+        "board": updated_doc.get("board"),
+        "current_player": updated_doc.get("current_player"),
+        "status": updated_doc.get("status"),
+        "moves": updated_doc.get("moves", []),
+    }
+    await db.games.update_one({"_id": oid}, {"$set": update_fields})
 
     # If game ended, update scores
     if updated_doc.get("status") in ("x_won", "o_won"):

@@ -32,6 +32,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     db_name = get_mongodb_db_name()
 
     client = AsyncIOMotorClient(mongo_url)
+
+    # Validate connectivity early for clearer startup failures
+    try:
+        await client.admin.command("ping")
+    except Exception as exc:
+        # Close client and re-raise for FastAPI to surface a clear startup error
+        client.close()
+        raise RuntimeError(f"MongoDB connection failed. Check MONGODB_URL/MONGODB_DB. Details: {exc}") from exc
+
     db = client[db_name]
     app.state.mongo_client = client
     app.state.db = db
