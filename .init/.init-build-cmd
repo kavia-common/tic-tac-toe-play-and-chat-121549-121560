@@ -1,0 +1,4 @@
+{
+    "command": "python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt",
+    "working_directory": "/home/kavia/workspace/code-generation/tic-tac-toe-play-and-chat-121549-121560/tic_tac_toe_backend"
+}
